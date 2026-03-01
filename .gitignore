@@ -1,12 +1,14 @@
 .env
-input/
-output/
+
+# Input/output content — ignore everything inside, keep folder structure
+input/**
+output/**
+!input/**/.gitkeep
+!output/**/.gitkeep
+
 __pycache__/
 *.pyc
 *.pyo
 .DS_Store
-separated/     # demucs output
-*.wav
-*.mp4
-*.mkv
-*.avi
+separated/
+
