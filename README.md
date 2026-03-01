@@ -47,15 +47,19 @@ video.mp4
 ```bash
 conda activate transcription
 
-# Run steps individually:
-python scripts/extract_audio.py input/video.mp4
-python scripts/denoise.py output/video.wav
-python scripts/transcribe.py output/video_vocals.wav
-python scripts/diarize.py output/video_vocals.wav output/video_vocals_transcription.json --speakers input/video.speakers.txt
+# Full pipeline — just pass the episode name:
+python scripts/pipeline.py episode_01
 
-# Or full pipeline:
-python scripts/pipeline.py input/video.mp4 --speakers input/video.speakers.txt
+# With options:
+python scripts/pipeline.py episode_01 --no-denoise
+python scripts/pipeline.py episode_01 --min-speakers 2 --max-speakers 3
+
+# Cleanup when done:
+python scripts/cleanup.py episode_01
 ```
+
+Input expected at `input/episode_01/episode_01.mp4` and `input/episode_01/episode_01.speakers.txt`.
+See `HOW_TO.md` for full step-by-step instructions.
 
 ## Configuration
 
