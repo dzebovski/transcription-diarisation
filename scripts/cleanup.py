@@ -1,14 +1,11 @@
 """
 cleanup.py — cleans up all working files after processing is done.
 
-By default runs in dry-run mode (shows what will be deleted, does nothing).
-Pass --confirm to actually delete.
+Shows what will be deleted, then asks: confirm or abort.
 
 Usage:
-  python scripts/cleanup.py                  # dry-run, shows all files to delete
-  python scripts/cleanup.py --confirm        # actually deletes
-  python scripts/cleanup.py episode_01       # dry-run for specific episode only
-  python scripts/cleanup.py episode_01 --confirm
+  python scripts/cleanup.py                  # clean everything (interactive)
+  python scripts/cleanup.py episode_01       # clean specific episode (interactive)
 """
 
 import argparse
@@ -33,11 +30,8 @@ def format_size(size_bytes: int) -> str:
     return f"{size_bytes} B"
 
 
-def collect_targets(episode: str = None) -> list[dict]:
-    """
-    Collects all paths to delete.
-    Returns list of dicts: {path, size, description}
-    """
+def collect_targets(episode: str = None) -> list:
+    """Collects all paths to delete."""
     targets = []
 
     # --- input/ ---
@@ -48,7 +42,7 @@ def collect_targets(episode: str = None) -> list[dict]:
         ep_dirs = [d for d in input_root.iterdir() if d.is_dir()] if input_root.exists() else []
 
     for ep_dir in ep_dirs:
-        for item in ep_dir.iterdir():
+        for item in sorted(ep_dir.iterdir()):
             if item.name == ".gitkeep":
                 continue
             targets.append({
@@ -65,7 +59,7 @@ def collect_targets(episode: str = None) -> list[dict]:
         ep_dirs = [d for d in output_root.iterdir() if d.is_dir()] if output_root.exists() else []
 
     for ep_dir in ep_dirs:
-        for item in ep_dir.iterdir():
+        for item in sorted(ep_dir.iterdir()):
             if item.name == ".gitkeep":
                 continue
             targets.append({
@@ -86,7 +80,7 @@ def collect_targets(episode: str = None) -> list[dict]:
     return targets
 
 
-def run_cleanup(episode: str = None, confirm: bool = False):
+def run_cleanup(episode: str = None):
     targets = collect_targets(episode)
 
     if not targets:
@@ -94,24 +88,27 @@ def run_cleanup(episode: str = None, confirm: bool = False):
         return
 
     total_size = sum(t["size"] for t in targets)
-
     scope = f"episode: {episode}" if episode else "all episodes"
-    mode = "DRY RUN" if not confirm else "DELETING"
 
-    print(f"\n[{mode}] Cleanup scope: {scope}")
-    print(f"{'─' * 50}")
-
+    print(f"\nCleanup scope: {scope}")
+    print(f"{'─' * 52}")
     for t in targets:
-        print(f"  {'would delete' if not confirm else 'deleting':12s}  {format_size(t['size']):>8}  {t['description']}")
-
-    print(f"{'─' * 50}")
+        print(f"  {format_size(t['size']):>8}  {t['description']}")
+    print(f"{'─' * 52}")
     print(f"  Total: {format_size(total_size)} across {len(targets)} items\n")
 
-    if not confirm:
-        print("This was a dry run. To actually delete, run with --confirm")
-        return
+    # Interactive prompt
+    while True:
+        answer = input("Delete all listed files? [y/N]: ").strip().lower()
+        if answer in ("y", "yes"):
+            break
+        elif answer in ("", "n", "no"):
+            print("Aborted. Nothing was deleted.")
+            return
+        else:
+            print("Please enter y or n.")
 
-    # Actually delete
+    # Delete
     deleted = 0
     for t in targets:
         try:
@@ -123,7 +120,7 @@ def run_cleanup(episode: str = None, confirm: bool = False):
         except Exception as e:
             print(f"  [ERROR] Could not delete {t['path']}: {e}")
 
-    print(f"[OK] Deleted {deleted}/{len(targets)} items ({format_size(total_size)} freed)")
+    print(f"\n[OK] Deleted {deleted}/{len(targets)} items — {format_size(total_size)} freed.")
 
 
 def main():
@@ -132,23 +129,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python scripts/cleanup.py                   # dry-run, show everything to delete
-  python scripts/cleanup.py --confirm         # delete everything
-  python scripts/cleanup.py episode_01        # dry-run for episode_01 only
-  python scripts/cleanup.py episode_01 --confirm
+  python scripts/cleanup.py                  # clean all episodes (interactive)
+  python scripts/cleanup.py episode_01       # clean specific episode (interactive)
         """,
     )
     parser.add_argument(
         "episode", nargs="?", default=None,
         help="Episode name to clean (e.g. episode_01). Omit to clean all."
     )
-    parser.add_argument(
-        "--confirm", action="store_true",
-        help="Actually delete files (default is dry-run)"
-    )
     args = parser.parse_args()
-
-    run_cleanup(episode=args.episode, confirm=args.confirm)
+    run_cleanup(episode=args.episode)
 
 
 if __name__ == "__main__":

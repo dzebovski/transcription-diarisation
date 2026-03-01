@@ -170,6 +170,39 @@ denoise:
 
 ---
 
+## Cleanup
+
+When you are done with an episode and want to free up disk space:
+
+```bash
+# Clean a specific episode
+python scripts/cleanup.py episode_01
+
+# Clean everything
+python scripts/cleanup.py
+```
+
+The script shows what will be deleted and how much space will be freed, then asks for confirmation:
+
+```
+Cleanup scope: episode: episode_01
+────────────────────────────────────────────────────
+     1.2 GB  input/episode_01/episode_01.mp4
+     2.1 KB  input/episode_01/episode_01.speakers.txt
+   320.5 MB  output/episode_01/episode_01.wav
+   280.1 MB  output/episode_01/episode_01_vocals.wav
+    45.2 MB  output/episode_01/episode_01_diarized.json
+     ...
+────────────────────────────────────────────────────
+  Total: 2.1 GB across 9 items
+
+Delete all listed files? [y/N]:
+```
+
+Type `y` to confirm or `n` / Enter to abort.
+
+---
+
 ## Troubleshooting
 
 | Problem | Solution |
