@@ -34,39 +34,38 @@ def collect_targets(episode: str = None) -> list:
     """Collects all paths to delete."""
     targets = []
 
-    # --- input/ ---
-    input_root = Path("input")
-    if episode:
-        ep_dirs = [input_root / episode] if (input_root / episode).exists() else []
-    else:
-        ep_dirs = [d for d in input_root.iterdir() if d.is_dir()] if input_root.exists() else []
+    for root_name in ("input", "output"):
+        root = Path(root_name)
+        if not root.exists():
+            continue
 
-    for ep_dir in ep_dirs:
-        for item in sorted(ep_dir.iterdir()):
+        # Collect files directly in root (legacy flat structure)
+        for item in sorted(root.iterdir()):
             if item.name == ".gitkeep":
                 continue
-            targets.append({
-                "path": item,
-                "size": get_size(item),
-                "description": f"input/{ep_dir.name}/{item.name}",
-            })
+            if item.is_file():
+                if episode and not item.stem.startswith(episode):
+                    continue
+                targets.append({
+                    "path": item,
+                    "size": get_size(item),
+                    "description": f"{root_name}/{item.name}",
+                })
 
-    # --- output/ ---
-    output_root = Path("output")
-    if episode:
-        ep_dirs = [output_root / episode] if (output_root / episode).exists() else []
-    else:
-        ep_dirs = [d for d in output_root.iterdir() if d.is_dir()] if output_root.exists() else []
-
-    for ep_dir in ep_dirs:
-        for item in sorted(ep_dir.iterdir()):
-            if item.name == ".gitkeep":
+        # Collect files inside episode subdirectories (new structure)
+        for ep_dir in sorted(root.iterdir()):
+            if not ep_dir.is_dir():
                 continue
-            targets.append({
-                "path": item,
-                "size": get_size(item),
-                "description": f"output/{ep_dir.name}/{item.name}",
-            })
+            if episode and ep_dir.name != episode:
+                continue
+            for item in sorted(ep_dir.iterdir()):
+                if item.name == ".gitkeep":
+                    continue
+                targets.append({
+                    "path": item,
+                    "size": get_size(item),
+                    "description": f"{root_name}/{ep_dir.name}/{item.name}",
+                })
 
     # --- separated/ (Demucs temp files) ---
     separated = Path("separated")
