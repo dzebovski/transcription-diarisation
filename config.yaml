@@ -25,14 +25,14 @@ diarization:
   min_speakers: 4
   max_speakers: 6
 
-# --- LLM post-processing (Ollama) ---
+# --- LLM post-processing (Ollama) — reserved for future use, not used by pipeline yet ---
 llm:
   enabled: true
   model: llama3.1:8b     # або gemma2:9b
   chunk_size: 2000       # символів на чанк
   language: uk
 
-# --- Output ---
+# --- Output — reserved for future use (formats/directory not yet read by pipeline) ---
 output:
   formats:
     - json

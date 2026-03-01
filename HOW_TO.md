@@ -20,7 +20,7 @@ conda activate transcription
 Check that everything is installed correctly:
 
 ```bash
-python scripts/pipeline.py --check-only placeholder
+python scripts/pipeline.py --check-only
 ```
 
 Expected output — all green OKs:

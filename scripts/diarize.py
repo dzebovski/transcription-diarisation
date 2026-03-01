@@ -7,6 +7,7 @@ diarize.py — діаризація (розділення спікерів) че
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -37,6 +38,18 @@ def load_speaker_names(speakers_file: str) -> dict:
     return {f"SPEAKER_{i:02d}": name for i, name in enumerate(names)}
 
 
+def default_speaker_name(speaker_id: str) -> str:
+    """
+    Дефолтне ім'я спікера, коли немає файлу *.speakers.txt.
+    SPEAKER_00 → SPEAKER_01, SPEAKER_01 → SPEAKER_02, …
+    """
+    m = re.match(r"SPEAKER_(\d+)$", speaker_id)
+    if m:
+        n = int(m.group(1)) + 1
+        return f"SPEAKER_{n:02d}"
+    return speaker_id
+
+
 def merge_segments(segments: list, speaker_map: dict, gap_threshold: float = 1.5) -> list:
     """
     Зливає сусідні сегменти одного спікера в один логічний блок.
@@ -50,7 +63,9 @@ def merge_segments(segments: list, speaker_map: dict, gap_threshold: float = 1.5
 
     for seg in segments:
         raw_speaker = seg.get("speaker", "UNKNOWN")
-        speaker = speaker_map.get(raw_speaker, raw_speaker)
+        speaker = speaker_map.get(raw_speaker)
+        if speaker is None:
+            speaker = default_speaker_name(raw_speaker)
         text = seg.get("text", "").strip()
         start = seg["start"]
         end = seg["end"]

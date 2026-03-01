@@ -84,3 +84,5 @@ pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu128
 pip install whisperx pyannote.audio demucs soundfile hf_xet
 cp .env.example .env  # add your HF_TOKEN
 ```
+
+`environment.yml` creates the base environment (Python 3.10, ffmpeg, and some pip deps). The **pip lines above are required** for the full pipeline (PyTorch with CUDA, WhisperX, pyannote, Demucs). Without them, the pipeline will fail on import or at runtime.
