@@ -1,0 +1,41 @@
+# ===== Transcription pipeline config =====
+
+# --- Audio extraction ---
+audio:
+  sample_rate: 16000
+  channels: 1  # mono
+  format: wav
+
+# --- Demucs denoising ---
+denoise:
+  enabled: true
+  model: htdemucs        # htdemucs або mdx_extra
+  stem: vocals           # витягуємо тільки голос
+
+# --- WhisperX transcription ---
+whisper:
+  model: large-v3        # large-v3 або large-v3-turbo
+  language: uk           # українська
+  batch_size: 16
+  compute_type: float16  # float16 для RTX 4080
+  device: cuda
+
+# --- Diarization (pyannote) ---
+diarization:
+  min_speakers: 4
+  max_speakers: 6
+
+# --- LLM post-processing (Ollama) ---
+llm:
+  enabled: true
+  model: llama3.1:8b     # або gemma2:9b
+  chunk_size: 2000       # символів на чанк
+  language: uk
+
+# --- Output ---
+output:
+  formats:
+    - json
+    - srt
+    - txt
+  directory: output

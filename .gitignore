@@ -1,0 +1,12 @@
+.env
+input/
+output/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+separated/     # demucs output
+*.wav
+*.mp4
+*.mkv
+*.avi

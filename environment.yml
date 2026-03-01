@@ -1,0 +1,16 @@
+name: transcription
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - ffmpeg
+  - pip:
+      - numpy<2
+      - whisperx
+      - pyannote.audio
+      - demucs
+      - python-dotenv
+      - pyyaml
+      - tqdm
